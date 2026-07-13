@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { stripAnsi } from "../src/utils/ansi.ts";
+import { sanitizeBinaryOutput } from "../src/utils/shell.ts";
 
 function referenceAnsiRegex(): RegExp {
 	const ST = "(?:\\u0007|\\u001B\\u005C|\\u009C)";
@@ -106,5 +107,11 @@ describe("stripAnsi", () => {
 	it("strips common ANSI sequences used in tool output", () => {
 		const input = "a\x1b[31mred\x1b[0m\x1b]8;;https://example.com\x07link\x1b]8;;\x07z";
 		expect(stripAnsi(input)).toBe("aredlinkz");
+	});
+});
+
+describe("sanitizeBinaryOutput", () => {
+	it("removes unsafe characters without altering displayable Unicode or whitespace", () => {
+		expect(sanitizeBinaryOutput("\0before\tafter\nnext\rline\x1f\ufff9😀")).toBe("before\tafter\nnext\rline😀");
 	});
 });
